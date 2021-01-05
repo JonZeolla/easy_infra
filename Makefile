@@ -3,7 +3,8 @@ APT_PACKAGES       = ansible azure-cli
 COMMIT_HASH       := $(shell git rev-parse HEAD)
 FROM_IMAGE         = ubuntu
 FROM_IMAGE_TAG     = 20.04
-GITHUB             = tfutils/tfenv tfsec/tfsec hashicorp/packer
+GITHUB             = tfutils/tfenv tfsec/tfsec
+HASHICORP          = packer consul-template envconsul
 IMAGE_NAME         = easy_infra
 UNAME_S           := $(shell uname -s)
 VERSION            = 0.7.1
@@ -20,7 +21,8 @@ endif
 
 
 ## Functions
-get_github_latest_version = $$(docker run --rm easy_infra:latest /bin/bash -c "curl -s https://api.github.com/repos/$(1)/releases/latest | jq -r '.tag_name'")
+get_github_latest_version = $$(docker run --rm alpine:latest /bin/ash -c "apk add curl jq && curl -s https://api.github.com/repos/$(1)/releases/latest | jq -r '.tag_name'")
+get_hashicorp_current_version = $$(docker run --rm alpine:latest /bin/ash -c "apk add curl jq && curl -s https://checkpoint-api.hashicorp.com/v1/check/$(1) | jq -r '.current_version'")
 update_dockerfile_package = ./update_components.sh --package=$(1) --version=$(2)
 update_dockerfile_repo    = ./update_components.sh --repo=$(1) --version=$(2)
 
@@ -33,7 +35,7 @@ all: update build
 update: update-dependencies
 
 .PHONY: update-dependencies
-update-dependencies: update-apt update-ci update-awscli update-checkov update-github update-terraform
+update-dependencies: update-apt update-ci update-awscli update-checkov update-github update-hashicorp
 
 
 .PHONY: generate-functions
@@ -82,11 +84,13 @@ update-github:
 	done
 	@echo "Done!"
 
-.PHONY: update-terraform
-update-terraform:
-	@echo "Updating the terraform version..."
-	@version=$$(docker run --rm easy_infra:latest /bin/bash -c "tfenv list-remote 2>/dev/null | egrep -v '(rc|alpha|beta)' | head -1"); \
-		$(call update_dockerfile_package,terraform,$${version})
+.PHONY: update-hashicorp
+update-hashicorp:
+	@echo "Updating hashicorp versions..."
+	@for package in $(HASHICORP); do \
+		version=$(call get_hashicorp_current_version,$${package}); \
+		$(call update_dockerfile_package,$${package},$${version}); \
+	done
 	@echo "Done!"
 
 
