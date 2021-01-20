@@ -3,6 +3,8 @@
 easy_infra is a docker container that simplifies and secures Infrastructure as Code deployments.
 
 ## Quickstart
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJonZeolla%2Feasy_infra.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FJonZeolla%2Feasy_infra?ref=badge_shield)
+
 In order to run your code from within the container, volume mount your files into `/iac` and pass your command, such as `terraform validate`, as such:
 ```bash
 docker run -v $(pwd):/iac seiso/easy_infra terraform validate
@@ -38,3 +40,7 @@ docker run -v $(pwd):/iac -v $(pwd)/plugin-cache:/root/.terraform.d/plugin-cache
 1. Commit your changes via `git commit -am 'Summarize the changes here'`
 1. Create a new pull request ([how-to](https://help.github.com/articles/creating-a-pull-request/))
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJonZeolla%2Feasy_infra.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FJonZeolla%2Feasy_infra?ref=badge_large)
